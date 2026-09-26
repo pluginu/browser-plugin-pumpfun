@@ -136,3 +136,5 @@ follow github flow and push to github in docs
 - Reviewed the implementation and staged publication scope. All 18 unit tests passed; the unchanged application files already passed the extended Chromium smoke test and live pump.fun collection check in the preceding request.
 - The proposed changes against main include both the P icon and persistent token-history counting. Image matching remains reference-based and collection is limited to supported loaded cards, as documented.
 - GitHub CLI authentication remains invalid. Publication uses Git over SSH; pull request creation will be attempted through the connected GitHub app. No merge is authorized or planned.
+- Publication result: committed token history as `9ac7536` under George Chung <chungg90210@gmail.com> and pushed `feat/token-history` with upstream tracking.
+- Pull request creation failed with GitHub app HTTP 403, `Resource not accessible by integration`. No PR was created or merged. Manual creation link: https://github.com/pluginu/browser-plugin-pumpfun/compare/main...feat/token-history?expand=1
