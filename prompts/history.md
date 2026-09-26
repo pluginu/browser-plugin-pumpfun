@@ -105,3 +105,5 @@ follow github flow and push to github in docs
 - Reviewed the icon, manifest, and header changes. All 12 unit tests passed; the browser smoke test already passed for these unchanged application files in the preceding request.
 - Prepared the P icon assets, manifest configuration, header/favicon changes, and prompt history for a feature-branch commit and push. Whitespace validation excludes preserved user prompts.
 - GitHub CLI credentials are invalid; Git over SSH remains available, and pull request creation will use the connected GitHub app.
+- Publication result: committed the icon change as `4a462d1` and pushed `feat/p-extension-icon` with upstream tracking.
+- Pull request creation through the GitHub app failed with HTTP 403, `Resource not accessible by integration`. No pull request was created and nothing was merged. Manual PR creation link: https://github.com/pluginu/browser-plugin-pumpfun/compare/main...feat/p-extension-icon?expand=1
