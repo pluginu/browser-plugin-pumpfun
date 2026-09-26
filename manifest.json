@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Pump Lens — Keyword Highlighter",
+  "version": "1.0.0",
+  "description": "Highlight pump.fun with positive and negative matching rules, plus a ChatGPT keyword workflow.",
+  "minimum_chrome_version": "116",
+  "permissions": ["storage", "offscreen", "clipboardWrite"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "action": { "default_title": "Open Pump Lens", "default_popup": "index.html" },
+  "options_page": "index.html",
+  "content_scripts": [{
+    "matches": ["https://pump.fun/*", "https://*.pump.fun/*"],
+    "js": ["content.js"],
+    "css": ["highlights.css"],
+    "run_at": "document_idle"
+  }]
+}

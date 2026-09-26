@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pump Lens</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+<div class="app">
+<header><a class="brand" href="#"><span class="logo">↗</span><span>Pump<span class="muted">Lens</span><small>YOUR SIGNAL. YOUR RULES.</small></span></a><div class="header-actions"><button id="expand" class="quiet" title="Open in a full tab">Expand ↗</button><label class="master"><input id="enabled" type="checkbox" checked><span class="switch"></span><span id="enabled-label">Live</span></label></div></header>
+<main>
+<div class="intro"><div><div class="eyebrow">A LITTLE CLARITY IN THE CHAOS</div><h1>Find your next keyword.</h1><p>Spot what matters on pump.fun. Keep the noise in red.</p></div><a class="site-link" href="https://pump.fun" target="_blank" rel="noreferrer">Open pump.fun ↗</a></div>
+<div class="stats"><div><span class="dot green"></span><strong id="positive-count">0</strong><span>positive rules</span></div><div><span class="dot red"></span><strong id="negative-count">0</strong><span>negative rules</span></div><div><span class="dot grey"></span><strong id="active-count">0</strong><span>enabled</span></div></div>
+<div class="tabs" role="tablist" aria-label="Workspace"><button class="tab active" id="tab-rules" role="tab" aria-selected="true" aria-controls="rules-panel" data-tab="rules-panel">Matching rules <span id="rule-count">0</span></button><button class="tab" id="tab-ai" role="tab" aria-selected="false" aria-controls="ai-panel" data-tab="ai-panel">✧ Keyword studio</button><button class="tab" id="tab-transfer" role="tab" aria-selected="false" aria-controls="transfer-panel" data-tab="transfer-panel">Import / export</button></div>
+<section id="rules-panel" role="tabpanel" aria-labelledby="tab-rules">
+<div class="section-heading"><div><h2>Your rules</h2><p>Green for matches. Red for words you want to avoid.</p></div><button id="add-rule" class="primary">+ Add rule</button></div>
+<div class="filters"><input id="search" type="search" placeholder="Search your rules…" aria-label="Search rules"><select id="filter" aria-label="Filter rules"><option value="all">All rules</option><option value="positive">Positive only</option><option value="negative">Negative only</option><option value="disabled">Disabled only</option></select></div>
+<div id="rule-list"></div><div id="empty" class="empty"><div class="empty-icon">⌕</div><h3>A clearer view starts here.</h3><p>Add your first word, phrase, or regex.<br>Or explore ideas in the keyword studio.</p><button id="first-rule" class="secondary">+ Create your first rule</button></div>
+<p class="note">Negative highlights take priority when matches overlap. Changes save automatically.</p>
+</section>
+<section id="ai-panel" role="tabpanel" aria-labelledby="tab-ai" hidden>
+<div class="section-heading"><div><h2>Turn one idea into a watchlist.</h2><p>Use your ChatGPT account to explore related keywords.</p><p class="note">1. Copy & open → 2. Paste and send in ChatGPT → 3. Copy its JSON → 4. Import here.</p></div><span class="pill">NO API KEY</span></div>
+<div class="studio-grid"><label>Seed word or phrase<input id="seed" placeholder="e.g. cosmic cat" maxlength="300"></label><label>Explore<select id="ai-task"><option value="similar">Similar words & synonyms</option><option value="opposite">Opposites as negative keywords</option><option value="related">Related themes & phrases</option><option value="variations">Spelling variants & abbreviations</option><option value="custom">Custom instruction</option></select></label><label>Words to generate<input id="ai-count" type="number" min="1" max="100" value="15"></label><label>Language<input id="ai-language" value="English" maxlength="60"></label></div>
+<label id="custom-wrap" hidden>Custom instruction<textarea id="ai-custom" rows="2" placeholder="Describe the keywords you want…"></textarea></label>
+<label>Prompt preview <button id="refresh-prompt" class="text-button">Refresh</button><textarea id="prompt" rows="7" placeholder="Enter a seed above to prepare your prompt. You can edit the result."></textarea></label>
+<div class="button-row"><button id="open-chatgpt" class="primary">Copy prompt & open ChatGPT ↗</button><button id="copy-prompt" class="secondary">Copy prompt</button></div>
+<p class="note">Paste and send the prompt in ChatGPT, then copy its JSON response. Your chat stays under your control.</p><button id="go-import" class="text-button">I have a response → Import JSON</button>
+</section>
+<section id="transfer-panel" role="tabpanel" aria-labelledby="tab-transfer" hidden>
+<div class="section-heading"><div><h2>Bring your keywords together.</h2><p>Paste a ChatGPT response or import a Pump Lens backup.</p></div><button id="export" class="secondary">Export rules ↓</button></div>
+<label>JSON to import<textarea id="import-json" rows="8" spellcheck="false" placeholder='{"positive": ["cat", "kitten"], "negative": ["scam", "rug"]}'></textarea></label>
+<div class="button-row"><button id="preview-import" class="primary">Preview import</button><label class="file-button secondary">Choose JSON file<input id="import-file" type="file" accept=".json,application/json" hidden></label></div>
+<div id="import-preview" class="import-preview" hidden><h3 id="import-summary"></h3><div id="import-chips" class="chips"></div><p class="note">Imports add rules to your list. Exact duplicates are skipped. Existing rules are preserved.</p><button id="confirm-import" class="primary">Add these rules</button></div>
+<details><summary>Supported JSON formats</summary><pre>{"positive": ["cat"], "negative": ["rug"]}
+
+{"rules": [{"pattern": "cat", "mode": "contains",
+  "polarity": "positive", "enabled": true,
+  "caseSensitive": false, "wholeWord": true,
+  "minLength": null, "maxLength": 40}]}</pre><p class="note">Modes: contains, startsWith, endsWith, exact, regex, length. Length limits apply to the entire trimmed text segment.</p></details>
+</section>
+</main><footer><span><span class="dot green"></span> <span id="page-status">Ready for pump.fun</span></span><span>LOCAL BY DEFAULT · v1.0</span></footer>
+</div>
+<dialog id="rule-dialog"><form id="rule-form"><div class="dialog-heading"><h2 id="dialog-title">Create a rule</h2><button type="button" id="close-dialog" class="quiet" aria-label="Close">✕</button></div><label>Word, phrase, or regex<input id="pattern" placeholder="e.g. cat, moon shot, or cat|kitten" maxlength="300"></label><div class="two-columns"><label>Match type<select id="mode"><option value="contains">Contains</option><option value="startsWith">Starts with</option><option value="endsWith">Ends with</option><option value="exact">Exact match</option><option value="regex">Regular expression</option><option value="length">Length only</option></select></label><label>Highlight<select id="polarity"><option value="positive">Green · positive</option><option value="negative">Red · negative</option></select></label></div><div class="two-columns"><label>Minimum length<input id="min-length" type="number" min="1" max="5000" placeholder="No minimum"></label><label>Maximum length<input id="max-length" type="number" min="1" max="5000" placeholder="No maximum"></label></div><p class="note">Length, start, and end refer to each trimmed page text segment, such as a token name. Phrases cannot span separate text nodes.</p><div class="checks"><label><input id="case-sensitive" type="checkbox"> Case sensitive</label><label><input id="whole-word" type="checkbox"> Whole words</label><label><input id="rule-enabled" type="checkbox" checked> Enabled</label></div><label id="flags-wrap" hidden>Regex flags<input id="flags" placeholder="Optional: i, m, s, u" maxlength="4"><span class="note">Enter the expression without / delimiters. The i flag overrides case sensitivity.</span></label><label>Try it on sample text<input id="test-text" placeholder="e.g. Cosmic cat is heading to the moon"></label><div id="test-result" class="test-result">Add sample text to test this rule.</div><p id="form-error" class="error" role="alert"></p><div class="button-row end"><button id="cancel-rule" type="button" class="secondary">Cancel</button><button type="submit" class="primary">Save rule</button></div></form></dialog>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<script type="module" src="app.js"></script>
+</body></html>
