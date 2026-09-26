@@ -107,3 +107,32 @@ follow github flow and push to github in docs
 - GitHub CLI credentials are invalid; Git over SSH remains available, and pull request creation will use the connected GitHub app.
 - Publication result: committed the icon change as `4a462d1` and pushed `feat/p-extension-icon` with upstream tracking.
 - Pull request creation through the GitHub app failed with HTTP 403, `Resource not accessible by integration`. No pull request was created and nothing was merged. Manual PR creation link: https://github.com/pluginu/browser-plugin-pumpfun/compare/main...feat/p-extension-icon?expand=1
+
+## 2026-09-26 — Count repeated token names, tickers, and images
+
+### Original prompt
+
+let's keep count of how many times a token name and ticker has appeared even an image 
+
+### Processing notes
+
+- Implemented persistent, device-local counts of distinct token addresses sharing a normalized name, ticker, or image reference. Reloads, duplicate cards, and multiple tabs do not inflate counts; missing metadata can be filled later.
+- Added a searchable Token history tab with name/ticker/image grouping, first-seen dates, on-demand image previews, capacity status, and confirmed reset. The master pause also stops collection, which works without keyword rules.
+- Added a serialized background writer, bounded storage (5,000 tokens or approximately 6 MB), token-address validation, and normalization for Pump image proxies and IPFS gateways. Counts cover supported loaded cards, not historical site-wide activity; image similarity and byte-level matching are not included.
+- Used the distinct-token interpretation after asking the user an optional clarification; no answer arrived during implementation. Documented counting semantics and limitations in README.md and the interface.
+- Browser skill bootstrap failed with `Cannot redefine property: process`; used standalone Playwright to inspect public pump.fun DOM and test the extension in temporary profiles. Live verification collected 20 real token cards. No wallet, sign-in, or trading interaction occurred.
+- Validation: 18 unit tests passed; extended Chromium smoke test passed grouping, persistent history, reload and multi-tab deduplication, pause/resume, reset, and existing highlighting/rule behavior. The initial reset test exposed and led to fixing extension-tab sender validation. Inspected the history UI screenshot.
+- No commit or push was made for this request.
+
+## 2026-09-26 — Publish token history through GitHub workflow
+
+### Original prompt
+
+follow github flow and push to github in docs
+
+### Processing notes
+
+- Followed `docs/github-flow.md`: fetched origin, created `feat/token-history` from `origin/main`, incorporated the previously published but unmerged icon commits by fast-forward, and restored the token-history changes without conflicts.
+- Reviewed the implementation and staged publication scope. All 18 unit tests passed; the unchanged application files already passed the extended Chromium smoke test and live pump.fun collection check in the preceding request.
+- The proposed changes against main include both the P icon and persistent token-history counting. Image matching remains reference-based and collection is limited to supported loaded cards, as documented.
+- GitHub CLI authentication remains invalid. Publication uses Git over SSH; pull request creation will be attempted through the connected GitHub app. No merge is authorized or planned.

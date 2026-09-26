@@ -29,7 +29,8 @@
         "https://*.pump.fun/*"
       ],
       "js": [
-        "content.js"
+        "content.js",
+        "token-tracker.js"
       ],
       "css": [
         "highlights.css"

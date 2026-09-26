@@ -1,3 +1,4 @@
+import { emptyHistory, groupSightings, MAX_TOKENS } from './sightings.js';
 import { normalizeRule, parseImport, MAX_RULES } from './rules.js';
 const $ = id => document.getElementById(id);
 const labels = { contains: 'Contains', startsWith: 'Starts with', endsWith: 'Ends with', exact: 'Exact match', regex: 'Regex', length: 'Length only' };
@@ -130,7 +131,7 @@ async function updateStatus() {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     const status = await chrome.tabs.sendMessage(tab.id, { type: 'status' });
-    $('page-status').textContent = !status.enabled ? 'Highlighting paused' : status.error || `${status.positive} green · ${status.negative} red matches · ${status.scanned} text segments${status.limited ? ' (scan limit)' : ''}`;
+    $('page-status').textContent = !status.enabled ? 'Highlighting and collection paused' : status.error || `${status.positive} green · ${status.negative} red matches · ${status.scanned} text segments${status.limited ? ' (scan limit)' : ''}`;
   } catch { $('page-status').textContent = 'Open or refresh pump.fun to see live matches'; }
 }
 window.addEventListener('unhandledrejection', event => { event.preventDefault(); toast(event.reason?.message || 'Something went wrong. Try again.', true); });
@@ -188,3 +189,48 @@ async function init() {
   render(); updateStatus(); setInterval(updateStatus, 2500);
 }
 init();
+
+let tokenHistory = emptyHistory();
+function renderHistory() {
+  const field = $('history-field').value;
+  const query = $('history-search').value.trim().toLowerCase();
+  const groups = groupSightings(tokenHistory, field).filter(group => group.value.toLowerCase().includes(query));
+  $('history-summary').textContent = `${tokenHistory.tokens.length.toLocaleString()} / ${MAX_TOKENS.toLocaleString()} tokens saved${tokenHistory.full ? ' · History full. Clear it to collect new tokens.' : ''}${!inExtension ? ' · Install the extension to collect tokens.' : ''}`;
+  $('history-heading').textContent = { name: 'Name', ticker: 'Ticker', image: 'Image reference' }[field];
+  $('history-rows').replaceChildren();
+  $('history-table').hidden = !groups.length;
+  $('history-empty').hidden = !!groups.length;
+  $('history-empty').textContent = tokenHistory.tokens.length ? 'No matching entries.' : 'Browse pump.fun to start collecting token history.';
+  for (const group of groups) {
+    const row = document.createElement('tr');
+    const value = document.createElement('td');
+    if (field === 'image' && group.imageUrl) {
+      const preview = document.createElement('button'); preview.className = 'quiet'; preview.textContent = 'Show image';
+      preview.addEventListener('click', () => {
+        const img = document.createElement('img'); img.className = 'history-image'; img.alt = 'Saved token image'; img.referrerPolicy = 'no-referrer';
+        img.src = group.imageUrl; img.addEventListener('error', () => { img.replaceWith(document.createTextNode('Image unavailable')); });
+        preview.replaceWith(img);
+      });
+      value.append(preview);
+    }
+    const label = document.createElement('span'); label.textContent = group.value; value.append(label);
+    const count = document.createElement('td'); count.textContent = group.count; count.className = 'history-count';
+    const date = document.createElement('td'); date.textContent = new Date(group.firstSeen).toLocaleDateString();
+    row.append(value, count, date); $('history-rows').append(row);
+  }
+}
+$('history-search').addEventListener('input', renderHistory);
+$('history-field').addEventListener('change', renderHistory);
+$('clear-history').addEventListener('click', async () => {
+  if (!inExtension || !confirm('Clear all saved token counts? Open pump.fun pages may collect their tokens again.')) return;
+  const result = await chrome.runtime.sendMessage({ type: 'clear-token-history' });
+  if (result?.error) throw new Error(result.error);
+  tokenHistory = emptyHistory(); renderHistory(); toast('Token history cleared.');
+});
+if (inExtension) {
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.tokenHistory) { tokenHistory = changes.tokenHistory.newValue || emptyHistory(); renderHistory(); }
+  });
+  chrome.storage.local.get('tokenHistory').then(saved => { tokenHistory = saved.tokenHistory || emptyHistory(); renderHistory(); });
+}
+renderHistory();

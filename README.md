@@ -90,3 +90,13 @@ node tests/browser-smoke.mjs
 The browser smoke test uses a locally fulfilled pump.fun fixture to exercise real extension messaging, dynamic highlights, red overlap priority, master pause, imports, persistence, and regex timeout recovery. It does not require or interact with a wallet or ChatGPT account.
 
 Repository procedures: [Prompt processing](docs/prompt-processing-flow.md) and [GitHub workflow](docs/github-flow.md).
+
+## Token history
+
+Open **Token history** to see how many distinct token addresses share a name, ticker, or image. Collection starts with this version and persists locally across visits and browser restarts. Reloads, repeated cards, and multiple tabs do not increase a token's count. Names and tickers ignore case, repeated whitespace, and Unicode compatibility differences. The first observed metadata is retained; missing fields can be filled later.
+
+The collector reads visible supported token cards loaded in the page, including the current pump.fun trending rows. It does not crawl all tokens, recover historical appearances, or read metadata from arbitrary page text. Layout changes or unsupported card layouts can leave tokens uncounted. The **Live / Paused** switch controls both highlighting and collection; collection works without keyword rules.
+
+Image counts match the image reference, not visual similarity or file contents. Pump image proxies and IPFS gateway references are normalized so size variants can match. Identical pictures uploaded to different URLs may not match. **Show image** loads that saved image from its original host on demand; unavailable images still retain their counts.
+
+History keeps up to 5,000 distinct tokens or approximately 6 MB, whichever comes first. It stops adding new entries at capacity rather than silently deleting old counts. **Clear history** resets counts after confirmation; open pages may immediately collect their tokens again. History is separate from keyword-rule JSON imports and exports.

@@ -83,6 +83,46 @@ try {
   }, 'pathological regex terminated and other matches restored');
   await manager.locator('.rule input[type=checkbox]').first().uncheck();
   await waitFor(async () => (await getHighlights()).positive.length === 4, 'per-rule disable');
+  // Token cards mirror the inspected live trending-row structure.
+  const addToken = (page, id) => page.evaluate(id => {
+    const card = document.createElement('div'); card.dataset.testid = 'trending-coin-row';
+    const link = document.createElement('a'); link.href = '/coin/' + id; link.setAttribute('aria-label', 'Shared Moon');
+    const ticker = document.createElement('span'); ticker.className = 'truncate'; ticker.textContent = '$MOON';
+    const image = document.createElement('img'); image.src = 'https://images.pump.fun/coin-image/' + id + '?ipfs=QmShared';
+    card.append(link, ticker, image); document.body.append(card);
+  }, id);
+  const history = () => service.evaluate(async () => (await chrome.storage.local.get('tokenHistory')).tokenHistory);
+  await addToken(fixture, 'A'.repeat(32));
+  await addToken(fixture, 'B'.repeat(32));
+  await waitFor(async () => (await history())?.tokens.length === 2, 'collect different tokens');
+  await addToken(fixture, 'A'.repeat(32));
+  await manager.getByRole('tab', {name:'Token history',exact:true}).click();
+  await waitFor(async () => await manager.locator('.history-count').first().textContent() === '2', 'grouped names');
+  await manager.locator('#history-field').selectOption('ticker');
+  assert.equal(await manager.locator('.history-count').first().textContent(), '2');
+  await manager.locator('#history-field').selectOption('image');
+  assert.equal(await manager.locator('.history-count').first().textContent(), '2');
+  await manager.screenshot({path:path.join(root,'artifacts','token-history.png'),fullPage:true});
+  await manager.reload();
+  await manager.getByRole('tab', {name:'Token history',exact:true}).click();
+  await waitFor(async () => await manager.locator('.history-count').first().textContent() === '2', 'history persistence');
+  await fixture.reload();
+  await addToken(fixture, 'A'.repeat(32));
+  const second = await context.newPage();
+  await second.route('https://pump.fun/**', route => route.fulfill({contentType:'text/html',body:'<html><body>Tokens</body></html>'}));
+  await second.goto('https://pump.fun/second');
+  await Promise.all([addToken(second,'B'.repeat(32)), addToken(fixture,'C'.repeat(32)), addToken(second,'D'.repeat(32))]);
+  await waitFor(async () => (await history())?.tokens.length === 4, 'cross-tab collection without lost writes or duplicates');
+  await manager.locator('#enabled').uncheck();
+  await addToken(second, 'E'.repeat(32));
+  await new Promise(resolve => setTimeout(resolve, 1300));
+  assert.equal((await history()).tokens.length, 4);
+  await manager.locator('#enabled').check();
+  await waitFor(async () => (await history())?.tokens.length === 5, 'collection resumes');
+  await fixture.close(); await second.close();
+  manager.once('dialog', dialog => dialog.accept());
+  await manager.locator('#clear-history').click();
+  await waitFor(async () => (await history())?.tokens.length === 0, 'clear history');
   assert.deepEqual(errors, []);
-  console.log('Browser smoke passed: editing, worker test, imports, persistence, prompt generation, live highlights, dynamic content, red priority, pause/resume, rule toggles, regex timeout recovery.');
+  console.log('Browser smoke passed: editing, worker test, imports, persistence, prompt generation, live highlights, dynamic content, red priority, pause/resume, rule toggles, regex timeout recovery, token history grouping, persistence, multi-tab deduplication, pause and reset.');
 } finally { await context.close(); await rm(profile, { recursive: true, force: true }); }
